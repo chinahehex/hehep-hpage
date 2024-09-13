@@ -216,6 +216,11 @@ class Paginator
         $this->data = $data;
     }
 
+    public function isEmpty():bool
+    {
+        return empty($this->data);
+    }
+
     public function toArray():array
     {
         return [

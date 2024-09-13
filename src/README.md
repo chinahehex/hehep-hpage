@@ -128,6 +128,7 @@ $result = [
 - 设置/获取分页参数
 ```php
 use \hehe\core\hpage\Pagination;
+$paginator = Pagination::paginator();
 
 // 每页显示条数(10)
 $paginator->setPageSize(10);
@@ -195,7 +196,7 @@ $result = [
 - 设置/获取分页参数
 ```php
 use \hehe\core\hpage\Pagination;
-
+$paginator = Pagination::queryPaginator();
 // 设置客户端分页参数
 $formQuery = [
     'page'=>1,// 当前页码
@@ -245,6 +246,44 @@ $paginator->getQueryCountStatus();
 
 ## 分页URL
 
+- 独立设置分页URL
+```php
+use \hehe\core\hpage\Pagination;
+$paginator = Pagination::queryPaginator($formQuery);
+$style = $paginator->newStyle();
+
+// 设置分页URL
+$style->setPath('api/test?id=1');
+
+// 带[PAGE]占位符URL
+$style->setPath('api/test/[PAGE]?id=1');
+
+$currentPageUrl = $style->getCurrentPageUrl();
+// $currentPageUrl: api/test?id=1&page=2
+
+```
+
+- 全局URL生成器
+```php
+use \hehe\core\hpage\Pagination;
+
+// 设置全局URL生成器
+Pagination::setUriBuilder(function(string $uri,array $uriParams = []){
+    // 自定义自己的URL生成规则
+    // $uriParams 已经包含了分页参数
+    // return Route::buildUrL($uri,$uriParams);
+    return $uri . '?' . http_build_query($uriParams);
+});
+
+$formQuery = ['page'=>2,'psize'=>10];
+$paginator = Pagination::queryPaginator($formQuery);
+$style = $paginator->newStyle();
+$style->setUrl('user/logs',['userId'=>1]);
+
+// 获取当前页URL
+$currentPageUrl = $style->getCurrentPageUrl();
+// $currentPageUrl : user/logs?userId=1&page=2
+```
 
 ## 分页样式器
 - 说明

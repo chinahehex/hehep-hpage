@@ -43,6 +43,10 @@ class PaginatorStyle
      */
     protected $pageVar = 'psize';
 
+    protected $uri = null;
+
+    protected $uriParams = [];
+
     public function __construct()
     {
 
@@ -58,15 +62,19 @@ class PaginatorStyle
         static::$uriBuilder = $uriBuilder;
     }
 
-    public function setPath(string $path):void
+    public function setPath(string $path):self
     {
         $this->path = $path;
         $this->parseUrlArr = parse_url($this->path);
+
+        return $this;
     }
 
-    public function setPageVar(string $pageVar):void
+    public function setPageVar(string $pageVar):self
     {
         $this->pageVar = $pageVar;
+
+        return $this;
     }
 
     public function getPageVar():string
@@ -76,13 +84,26 @@ class PaginatorStyle
 
     public function buildUrl(int $pageNum):string
     {
-        if (!is_null(static::$uriBuilder)) {
-            return call_user_func(static::$uriBuilder, [$this->pageVar=>$pageNum]);
+        if (!is_null(static::$uriBuilder) && !is_null($this->uri)) {
+            $uri_params = array_merge($this->uriParams, [$this->pageVar=>$pageNum]);
+            return call_user_func(static::$uriBuilder, $this->uri,$uri_params);
         } else if ($this->path !== '') {
-            return $this->buildPathUrl($pageNum);
+            if (strpos($this->path,'[PAGE]') !== false) {
+                return str_replace('[PAGE]', (string) $pageNum, $this->path);
+            } else {
+                return $this->buildPathUrl($pageNum);
+            }
         } else {
             return '';
         }
+    }
+
+    public function setUrl(string $url = '',array $params = []):self
+    {
+        $this->uri = $url;
+        $this->uriParams = $params;
+
+        return $this;
     }
 
     protected function buildPathUrl(int $pageNum):string
@@ -102,7 +123,9 @@ class PaginatorStyle
 
         if (isset($this->parseUrlArr['query'])) {
             $query = $this->parseUrlArr['query'];
-            $url .= '?' . $query . '&' . $this->pageVar . '=' . $pageNum;
+            parse_str($query,$queryArr);
+            $queryArr[$this->pageVar] = $pageNum;
+            $url .= '?' . http_build_query($queryArr);
         } else {
             $url .= '?' . $this->pageVar . '=' . $pageNum;
         }
