@@ -98,14 +98,14 @@ class PaginationTest extends TestCase
     public function testSetUrlBuilder()
     {
         // 设置生成
-        Pagination::setUriBuilder(function (array $pageParams){
-            return 'style?'.http_build_query($pageParams);
+        PaginatorStyle::setUriBuilder(function (string $url,array $urlParams){
+            return $url . '?' . http_build_query($urlParams);
         });
 
         $paginator = Pagination::paginator(31,10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
-        $pstyle->setPageVar('psizex');
+        $pstyle->setPageVar('psizex')->setUrl('style');
         $this->assertTrue($pstyle->getCurrentPageUrl() === 'style?psizex=31');
         $this->assertTrue($pstyle->getFirstPageUrl() === 'style?psizex=1');
         $this->assertTrue($pstyle->getPrevPageUrl() === 'style?psizex=30');

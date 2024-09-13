@@ -85,11 +85,13 @@ class Paginator
      * 略
      *</pre>
      * @param int $totalCount
-     * @return void
+     * @return self
      */
-    public function setTotalCount(int $totalCount = 0):void
+    public function setTotalCount(int $totalCount = 0):self
     {
         $this->totalCount = $totalCount;
+
+        return $this;
     }
 
     public function getTotalCount():int
@@ -97,9 +99,11 @@ class Paginator
         return $this->totalCount;
     }
 
-    public function setCurrentPage(int $currentPage):void
+    public function setCurrentPage(?int $currentPage):self
     {
         $this->currentPage = $currentPage;
+
+        return $this;
     }
 
     public function setStyleClass(string $styleClass):self
@@ -121,9 +125,11 @@ class Paginator
         return $this;
     }
 
-    public function setPageSize(int $pageSize):void
+    public function setPageSize(?int $pageSize):self
     {
         $this->pageSize = $pageSize;
+
+        return $this;
     }
 
     public function getPageVar():string
@@ -131,9 +137,11 @@ class Paginator
         return $this->pageVar;
     }
 
-    public function setPageVar(string $pageVar):void
+    public function setPageVar(string $pageVar):self
     {
         $this->pageVar = $pageVar;
+
+        return $this;
     }
 
     public function getPageSizeVar():string
@@ -141,9 +149,11 @@ class Paginator
         return $this->pageSizeVar;
     }
 
-    public function setPageSizeVar(string $pageSizeVar):void
+    public function setPageSizeVar(string $pageSizeVar):self
     {
         $this->pageSizeVar = $pageSizeVar;
+
+        return $this;
     }
 
     /**
@@ -180,9 +190,11 @@ class Paginator
         return $this->currentPage;
     }
 
-    public function asQueryCount(bool $isQueryCount = true):void
+    public function asQueryCount(bool $isQueryCount = true):self
     {
         $this->isQueryCount = $isQueryCount;
+
+        return $this;
     }
 
     public function getQueryCountStatus():bool
@@ -211,9 +223,11 @@ class Paginator
         }
     }
 
-    public function setData(?array $data = []):void
+    public function setData(?array $data = []):self
     {
         $this->data = $data;
+
+        return $this;
     }
 
     public function isEmpty():bool

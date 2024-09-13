@@ -112,6 +112,8 @@ $paginator = new Paginator(1,10);
 
 - 获取分页相关参数
 ```php
+use \hehe\core\hpage\Pagination;
+$paginator = Pagination::paginator(1,10);
 $result = $paginator->toArray();
 
 // 返回的结果为：
@@ -165,6 +167,7 @@ $paginator->toArray();
 ```
 - 创建客户端分页器
 ```php
+use \hehe\core\hpage\Pagination;
 // 表单数据
 $formQuery = [
     'page'=>1,// 当前页码
@@ -176,6 +179,8 @@ $paginator = Pagination::queryPaginator($formQuery);
 
 - 获取分页相关参数
 ```php
+use \hehe\core\hpage\Pagination;
+$paginator = Pagination::paginator(1,10);
 $result = $paginator->toArray();
 
 // 返回的结果为：
@@ -249,6 +254,10 @@ $paginator->getQueryCountStatus();
 - 独立设置分页URL
 ```php
 use \hehe\core\hpage\Pagination;
+$formQuery = [
+    'page'=>1,// 当前页码
+    'psize'=>10,// 每页显示条数
+];
 $paginator = Pagination::queryPaginator($formQuery);
 $style = $paginator->newStyle();
 

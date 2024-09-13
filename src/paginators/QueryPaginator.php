@@ -55,15 +55,17 @@ class QueryPaginator extends Paginator
      */
     protected $query = [];
 
-    public function __construct(array $query, ?int $pageSize = null)
+    public function __construct(array $query = [], ?int $pageSize = null)
     {
         $this->setQuery($query);
         $this->setPageSize($pageSize);
     }
 
-    public function setQuery(array $query):void
+    public function setQuery(array $query):self
     {
         $this->query = $query;
+
+        return $this;
     }
 
     public function getQuery():array
@@ -71,11 +73,13 @@ class QueryPaginator extends Paginator
         return $this->query;
     }
 
-    public function asLastMode(string $dataLastVar = 'id',string $queryLastVar = 'lastId'):void
+    public function asLastMode(string $dataLastVar = 'id',string $queryLastVar = 'lastId'):self
     {
         $this->lastMode = true;
         $this->dataLastVar = $dataLastVar;
         $this->queryLastVar = $queryLastVar;
+
+        return $this;
     }
 
     public function getDataLastVar():string
@@ -166,11 +170,6 @@ class QueryPaginator extends Paginator
         }
 
         return $pageSize;
-    }
-
-    public function setPageSize(?int $pageSize):void
-    {
-        $this->pageSize = $pageSize;
     }
 
     public function toArray():array
