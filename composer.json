@@ -1,6 +1,6 @@
 {
 	"name": "hehex/hehep-hpage",
-	"description": "hehep-hpage 是一个PHP 分页基础组件",
+	"description": "hehep-hpage 是一个PHP分页组件,支持自定义分页器,支持自定义分页样式,支持lastId模式",
 	"license": "Apache-2.0",
 	"authors": [
 		{
@@ -12,7 +12,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"hpage\\": "src/"
+			"hehe\\core\\hpage\\": "src/"
 		}
 	},
 	"autoload-dev": {
