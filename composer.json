@@ -1,0 +1,23 @@
+{
+	"name": "hehex/hehep-hpage",
+	"description": "hehep-hpage 是一个PHP 分页基础组件",
+	"license": "Apache-2.0",
+	"authors": [
+		{
+			"name": "hehe"
+		}
+	],
+	"require": {
+		"php": ">=7.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"hpage\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"hpage\\test": "tests/"
+		}
+	}
+}
