@@ -11,7 +11,7 @@ use hehe\core\hpage\styles\PaginatorStyle;
  *<pre>
  *  Paginator
  *</pre>
- * @method static QueryPaginator queryPaginator(array $query, int $pageSize = 10)
+ * @method static QueryPaginator queryPaginator(array $query = [], ?int $pageSize = null)
  * @method static Paginator paginator(int $currentPage, int $pageSize = 10)
  */
 class Pagination
