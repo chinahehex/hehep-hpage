@@ -8,89 +8,89 @@ use hpage\tests\TestCase;
 
 class PaginationTest extends TestCase
 {
-    protected function setUp()
+    protected function setUp():void
     {
         parent::setUp();
     }
 
     // 单个测试之后(每个测试方法之后调用)
-    protected function tearDown()
+    protected function tearDown():void
     {
         parent::tearDown();
     }
 
     public function testQueryTotalPage()
     {
-        $paginator = Pagination::queryPaginator(['page'=>1]);
+        $paginator = $this->hpage->queryPaginator(['page'=>1]);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 300);
 
-        $paginator = Pagination::queryPaginator(['page'=>1],30);
+        $paginator = $this->hpage->queryPaginator(['page'=>1],30);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 100);
 
-        $paginator = Pagination::queryPaginator(['page'=>1],30);
+        $paginator = $this->hpage->queryPaginator(['page'=>1],30);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 100);
 
-        $paginator = Pagination::queryPaginator(['page'=>1],29);
+        $paginator = $this->hpage->queryPaginator(['page'=>1],29);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 104);
     }
 
     public function testDefaultTotalPage()
     {
-        $paginator = Pagination::paginator(1);
+        $paginator = $this->hpage->paginator(1);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 300);
 
-        $paginator = Pagination::paginator(1,30);
+        $paginator = $this->hpage->paginator(1,30);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 100);
 
-        $paginator = Pagination::paginator(1,30);
+        $paginator = $this->hpage->paginator(1,30);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 100);
 
-        $paginator = Pagination::paginator(1,29);
+        $paginator = $this->hpage->paginator(1,29);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 104);
     }
 
     public function testCreatePaginator()
     {
-        $paginator = Pagination::createPaginator('paginator',1);
+        $paginator = $this->hpage->createPaginator('paginator',1);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 300);
 
-        $paginator = Pagination::createPaginator('paginator',1,30);
+        $paginator = $this->hpage->createPaginator('paginator',1,30);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 100);
 
-        $paginator = Pagination::createPaginator('paginator',1,30);
+        $paginator = $this->hpage->createPaginator('paginator',1,30);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 100);
 
-        $paginator = Pagination::createPaginator('paginator',1,29);
+        $paginator = $this->hpage->createPaginator('paginator',1,29);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 104);
     }
 
     public function testCreateQueryTotalPage()
     {
-        $paginator = Pagination::createPaginator('query',['page'=>1]);
+        $paginator = $this->hpage->createPaginator('query',['page'=>1]);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 300);
 
-        $paginator = Pagination::createPaginator('query',['page'=>1],30);
+        $paginator = $this->hpage->createPaginator('query',['page'=>1],30);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 100);
 
-        $paginator = Pagination::createPaginator('query',['page'=>1],30);
+        $paginator = $this->hpage->createPaginator('query',['page'=>1],30);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 100);
 
-        $paginator =  Pagination::createPaginator('query',['page'=>1],29);
+        $paginator =  $this->hpage->createPaginator('query',['page'=>1],29);
         $paginator->setTotalCount(3000);
         $this->assertTrue($paginator->getTotalPage() === 104);
     }
@@ -102,7 +102,7 @@ class PaginationTest extends TestCase
             return $url . '?' . http_build_query($urlParams);
         });
 
-        $paginator = Pagination::paginator(31,10);
+        $paginator =$this->hpage->paginator(31,10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
         $pstyle->setPageVar('psizex')->setUrl('style');
@@ -112,6 +112,45 @@ class PaginationTest extends TestCase
         $this->assertTrue($pstyle->getNextPageUrl() === 'style?psizex=30');
         $this->assertTrue($pstyle->getLastPageUrl() === 'style?psizex=30');
 
+    }
+
+    public function testRetAlias()
+    {
+        $this->hpage->setOptions([
+            'retAlias'=>['total'=>'total1','psize'=>'psize']
+        ]);
+
+        $paginator = $this->hpage->queryPaginator(['page'=>1]);
+        $params = $paginator->toArray();
+
+        $this->assertTrue(isset($params['total1']));
+        $this->assertTrue(isset($params['psize']));
+        $this->assertTrue(!isset($params['currentPage']));
+    }
+
+    public function testRetAlias1()
+    {
+        $this->hpage->setOptions([
+            'retAlias'=>['total','psize'=>'pagesize']
+        ]);
+
+        $paginator = $this->hpage->queryPaginator(['page'=>1]);
+        $params = $paginator->toArray();
+
+        $this->assertTrue(isset($params['total']));
+        $this->assertTrue(isset($params['pagesize']));
+        $this->assertTrue(!isset($params['currentPage']));
+    }
+
+    public function testRetAlias2()
+    {
+
+        $paginator = $this->hpage->queryPaginator(['page'=>1]);
+        $params = $paginator->toArray(['total','psize'=>'pagesize']);
+
+        $this->assertTrue(isset($params['total']));
+        $this->assertTrue(isset($params['pagesize']));
+        $this->assertTrue(!isset($params['currentPage']));
     }
 
 

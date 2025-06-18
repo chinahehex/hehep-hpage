@@ -26,7 +26,7 @@ class Paginator
      *</pre>
      * @var int
      */
-    protected $pageSize = 10;
+    protected $psize = 10;
 
     /**
      * 当前页码
@@ -52,7 +52,7 @@ class Paginator
      * 是否查询总条数
      * @var bool
      */
-    protected $isQueryCount = false;
+    protected $queryCount = false;
 
     /**
      * 当前页码参数名称
@@ -64,7 +64,15 @@ class Paginator
      * 每页大小参数名称
      * @var string
      */
-    protected $pageSizeVar = 'psize';
+    protected $psizeVar = 'psize';
+
+    protected $retAlias = [
+        'total'=>'total',
+        'psize'=>'psize',
+        'totalPage'=>'totalPage',
+        'currentPage'=>'currentPage',
+        'data'=>'data',
+    ];
 
     /**
      * 分页样式类路径
@@ -72,10 +80,19 @@ class Paginator
      */
     protected $styleClass = PaginatorStyle::class;
 
-    public function __construct(int $currentPage, int $pageSize = 10)
+    public function __construct(int $currentPage, int $psize = 10)
     {
         $this->setCurrentPage($currentPage);
-        $this->setPageSize($pageSize);
+        $this->setPageSize($psize);
+    }
+
+    public function setOptions(array $options = []): void
+    {
+        foreach ($options as $name=>$value) {
+            if (property_exists($this,$name)) {
+                $this->{$name} = $value;
+            }
+        }
     }
 
     /**
@@ -125,9 +142,9 @@ class Paginator
         return $this;
     }
 
-    public function setPageSize(?int $pageSize):self
+    public function setPageSize(?int $psize):self
     {
-        $this->pageSize = $pageSize;
+        $this->psize = $psize;
 
         return $this;
     }
@@ -146,12 +163,12 @@ class Paginator
 
     public function getPageSizeVar():string
     {
-        return $this->pageSizeVar;
+        return $this->psizeVar;
     }
 
-    public function setPageSizeVar(string $pageSizeVar):self
+    public function setPageSizeVar(string $psizeVar):self
     {
-        $this->pageSizeVar = $pageSizeVar;
+        $this->psizeVar = $psizeVar;
 
         return $this;
     }
@@ -166,11 +183,11 @@ class Paginator
      */
     public function getPageSize():int
     {
-        if ($this->pageSize <= 0) {
+        if ($this->psize <= 0) {
             return 10;
         }
 
-        return $this->pageSize;
+        return $this->psize;
     }
 
     /**
@@ -190,16 +207,16 @@ class Paginator
         return $this->currentPage;
     }
 
-    public function asQueryCount(bool $isQueryCount = true):self
+    public function asQueryCount(bool $queryCount = true):self
     {
-        $this->isQueryCount = $isQueryCount;
+        $this->queryCount = $queryCount;
 
         return $this;
     }
 
-    public function getQueryCountStatus():bool
+    public function isQueryCount():bool
     {
-        return $this->isQueryCount;
+        return $this->queryCount;
     }
 
     public function getTotalPage():int
@@ -230,20 +247,40 @@ class Paginator
         return $this;
     }
 
+    public function getData():?array
+    {
+        return $this->data;
+    }
+
     public function isEmpty():bool
     {
         return empty($this->data);
     }
 
-    public function toArray():array
+    public function toArray(array $retAlias = []):array
     {
-        return [
-            'pageSize'=>$this->getPageSize(),
+        $page = [
+            'total'=>$this->getTotalCount(),
+            'psize'=>$this->getPageSize(),
             'totalPage'=>$this->getTotalPage(),
-            'totalCount'=>$this->getTotalCount(),
             'currentPage'=>$this->getCurrentPage(),
             'data'=>$this->data,
         ];
+
+        if (empty($retAlias)) {
+            $retAlias = $this->retAlias;
+        }
+        $params = [];
+        foreach ($retAlias as $name=>$alias) {
+            if (is_numeric($name)) {
+                $name = $alias;
+            }
+            if (isset($page[$name])) {
+                $params[$alias] = $page[$name];
+            }
+        }
+
+        return $params;
     }
 
     public function newStyle(...$args):PaginatorStyle

@@ -50,33 +50,52 @@ class QueryPaginator extends Paginator
     protected $dataLastVar = 'id';
 
     /**
+     * 最后id排序方式
+     * @var string
+     */
+    protected $lastSort = 'desc';
+
+    /**
      * 页面参数
      * @var array
      */
     protected $query = [];
 
-    public function __construct(array $query = [], ?int $pageSize = null)
+    protected $retAlias = [
+        'total'=>'total',
+        'psize'=>'psize',
+        'totalPage'=>'totalPage',
+        'currentPage'=>'currentPage',
+        'lastId'=>'lastId'
+    ];
+
+    public function __construct($query = [], ?int $pageSize = null)
     {
         $this->setQuery($query);
         $this->setPageSize($pageSize);
     }
 
-    public function setQuery(array $query):self
+    public function setQuery($query):self
     {
         $this->query = $query;
 
         return $this;
     }
 
-    public function getQuery():array
+    /**
+     *
+     * @return array
+     */
+    public function getQuery()
     {
         return $this->query;
     }
 
-    public function asLastMode(string $dataLastVar = 'id',string $queryLastVar = 'lastId'):self
+    public function asLastMode(string $dataLastVar = 'id',string $lastSort = 'desc',string $queryLastVar = 'lastId'):self
     {
         $this->lastMode = true;
         $this->dataLastVar = $dataLastVar;
+        $this->lastSort = $lastSort;
         $this->queryLastVar = $queryLastVar;
 
         return $this;
@@ -92,7 +111,12 @@ class QueryPaginator extends Paginator
         return $this->queryLastVar;
     }
 
-    public function isLastModeStatus():bool
+    public function getLastSort():string
+    {
+        return $this->lastSort;
+    }
+
+    public function isLast():bool
     {
         return $this->lastMode;
     }
@@ -100,9 +124,9 @@ class QueryPaginator extends Paginator
     /**
      * @return bool
      */
-    public function getQueryCountStatus():bool
+    public function isQueryCount():bool
     {
-        if ($this->isQueryCount === true) {
+        if ($this->queryCount === true) {
             return true;
         }
 
@@ -140,6 +164,13 @@ class QueryPaginator extends Paginator
         return $idVal;
     }
 
+    public function setQueryLastId($idVal):self
+    {
+        $this->query[$this->queryLastVar] = $idVal;
+
+        return $this;
+    }
+
     public function getCurrentPage():int
     {
         $pageNum = 0;
@@ -158,29 +189,53 @@ class QueryPaginator extends Paginator
 
     public function getPageSize():int
     {
-        $pageSize = 0;
-        if (!is_null($this->pageSize)) {
-            $pageSize = $this->pageSize;
-        } else if (isset($this->query[$this->pageSizeVar])) {
-            $pageSize = intval($this->query[$this->pageSizeVar]);
+        $psize = 0;
+        if (!is_null($this->psize)) {
+            $psize = $this->psize;
+        } else if (isset($this->query[$this->psizeVar])) {
+            $psize = intval($this->query[$this->psizeVar]);
         }
 
-        if ($pageSize <= 0) {
-            $pageSize = 10;
+        if ($psize <= 0) {
+            $psize = 10;
         }
 
-        return $pageSize;
+        return $psize;
     }
 
-    public function toArray():array
+    public function toArray(array $retAlias = []):array
     {
-        $page = parent::toArray();
-        $page['lastId'] = $this->getDataLastId();
-        $page['queryLastVar'] = $this->getQueryLastVar();
-        $page['pageVar'] = $this->getPageVar();
-        $page['pageSizeVar'] = $this->getPageSizeVar();
+        $page = [
+            'total'=>$this->getTotalCount(),
+            'psize'=>$this->getPageSize(),
+            'totalPage'=>$this->getTotalPage(),
+            'currentPage'=>$this->getCurrentPage(),
+            'data'=>$this->data,
+            'pageVar'=>$this->getPageVar(),
+            'psizeVar'=>$this->getPageSizeVar(),
+            'lastId'=>$this->getDataLastId(),
+        ];
 
-        return $page;
+        if (!$this->isLast()) {
+            unset($page['lastId']);
+        }
+
+        $params = [];
+
+        if (empty($retAlias)) {
+            $retAlias = $this->retAlias;
+        }
+
+        foreach ($retAlias as $name=>$alias) {
+            if (is_numeric($name)) {
+                $name = $alias;
+            }
+            if (isset($page[$name])) {
+                $params[$alias] = $page[$name];
+            }
+        }
+
+        return $params;
     }
 
 }

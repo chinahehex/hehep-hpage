@@ -19,11 +19,44 @@ git clone git@github.com:chinahehex/hehep-hpage.git
 composer require hehex/hehep-hpage
 ```
 
+## 组件配置
+
+```php
+$config = [
+    // 分页管理器
+    //'class'=>'hehe\core\hpage\Pagination',
+    
+    // 客户端页面参数名称
+    'pageVar'=>'page',
+    
+    // 客户端每页条数参数名称
+    'psizeVar'=>'psize',
+    
+    // 客户端lastId参数名称
+    'lastIdVar'=>'lastId',
+    
+    // toArray 返回的变量别名,基本格式<键名=>别名>
+    'retAlias'=>[
+        'total'=>'total',// 总条数
+        'psize'=>'psize',// 每页条数
+        'totalPage'=>'totalPage',// 总页数
+        'currentPage'=>'currentPage',// 当前页码
+        'data'=>'data',// 当前页数据
+        'lastId'=>'lastId'// 当前页最后一条数据id
+    ],
+    
+    // url 地址生成器call_user_func 方法格式
+    'uriBuilder'=>[]//
+];
+
+
+```
+
 ## 基本示例
 - 客户端分页
 ```php
 use hehe\core\hpage\Pagination;
-
+$hpage = new Pagination();
 // 表单数据
 $form = [
     'page'=>1,// 当前页码
@@ -31,7 +64,7 @@ $form = [
 ];
 
 // 创建一个客户端分页器
-$paginator = Pagination::queryPaginator($form);
+$paginator = $hpage->queryPaginator($form);
 
 // 主动设置每页显示条数(不接受客户端每页条数参数)
 $paginator->setPageSize(10);
@@ -62,9 +95,9 @@ $paginator->toArray();
 - 内部分页
 ```php
 use hehe\core\hpage\Pagination;
-
+$hpage = new Pagination();
 // 创建一个内部 分页器
-$paginator = Pagination::paginator(1,10);
+$paginator = $hpage->paginator(1,10);
 
 // 主动设置每页显示条数
 $paginator->setPageSize(10);
@@ -102,27 +135,55 @@ $paginator->toArray();
 - 创建默认分页器
 ```php
 use \hehe\core\hpage\Pagination;
-use \hehe\core\hpage\Paginator;
-// 创建一个默认分页器,默认每页显示10条数据,当前页码为1
+use \hehe\core\hpage\paginators\Paginator;
+use \hehe\core\hpage\paginators\QueryPaginator;
+$hpage = new Pagination();
 
-$paginator = Pagination::paginator(1,10);
+// 创建一个默认分页器,默认每页显示10条数据,当前页码为1
+$paginator = $hpage->paginator(1,10);
 $paginator = new Paginator(1,10);
 
-```
-
-- 获取分页相关参数
-```php
-use \hehe\core\hpage\Pagination;
-$paginator = Pagination::paginator(1,10);
+// toArray 返回分页相关参数
 $result = $paginator->toArray();
 
 // 返回的结果为：
 $result = [
-    'pageSize'=>10,// 每页显示条数
+    'total'=>10,// 总条数 
+    'psize'=>1,// 每页显示条数 
+    'totalPage'=>0,// 总页数
+    'currentPage'=>0,// 当前页码 
+    'data'=>[],// 当前页数据
+];
+
+
+
+```
+
+- 创建客户端分页器
+```php
+use \hehe\core\hpage\Pagination;
+$hpage = new Pagination();
+$formQuery = [
+    'page'=>1,// 当前页码
+    'psize'=>10,// 每页显示条数
+    'lastId'=>''// 当前页最后一条数据id
+];
+$paginator = $hpage->queryPaginator($formQuery,10);
+$paginator = new QueryPaginator($formQuery,10);
+
+// toArray 返回分页相关参数
+$result = $paginator->toArray();
+
+// 返回的结果为：
+$result = [
+    'psize'=>10,// 每页显示条数
     'currentPage'=>1,// 当前页码
-    'totalCount'=>0,// 总条数
+    'total'=>0,// 总条数
     'totalPage'=>0,// 总页数
     'data'=>[],// 当前页数据
+    'pageVar'=>'',// 客户端页码参数名称
+    'psizeVar'=>'',// 客户端每页条数
+    'lastId'=>'',// 当前页最后一条数据id
 ];
 
 ```
@@ -130,7 +191,8 @@ $result = [
 - 设置/获取分页参数
 ```php
 use \hehe\core\hpage\Pagination;
-$paginator = Pagination::paginator();
+$hpage = new Pagination();
+$paginator = $hpage->paginator();
 
 // 每页显示条数(10)
 $paginator->setPageSize(10);
@@ -159,78 +221,19 @@ $paginator->toArray();
 
 ```
 
-## 客户端分页器
-- 说明
-```
-类路径：hehe\core\hpage\Pagination,继承\hehe\core\hpage\Paginator
-功能:支持客户端分页参数，支持自定义分页样式,支持lastId模式,常用于api接口
-```
-- 创建客户端分页器
-```php
-use \hehe\core\hpage\Pagination;
-// 表单数据
-$formQuery = [
-    'page'=>1,// 当前页码
-    'psize'=>10,// 每页显示条数
-    'lastId'=>''// 当前页最后一条数据id
-];
-$paginator = Pagination::queryPaginator($formQuery);
-```
-
-- 获取分页相关参数
-```php
-use \hehe\core\hpage\Pagination;
-$paginator = Pagination::paginator(1,10);
-$result = $paginator->toArray();
-
-// 返回的结果为：
-$result = [
-    'pageSize'=>10,// 每页显示条数
-    'currentPage'=>1,// 当前页码
-    'totalCount'=>0,// 总条数
-    'totalPage'=>0,// 总页数
-    'data'=>[],// 当前页数据
-    'lastId'=>'',// 当前页最后一条数据id
-    'queryLastVar'=>'',// 客户端lastId参数名称
-    'pageVar'=>'',// 客户端页码参数名称
-    'pageSizeVar'=>'',// 客户端每页条数参数名称
-];
-
-```
-
-- 设置/获取分页参数
-```php
-use \hehe\core\hpage\Pagination;
-$paginator = Pagination::queryPaginator();
-// 设置客户端分页参数
-$formQuery = [
-    'page'=>1,// 当前页码
-    'psize'=>10,// 每页显示条数
-];
-$paginator->setQuery($formQuery);
-
-// 主动设置每页显示条数(10),客户端传入的每页条数参数失效
-$paginator->setPageSize(10);
-$paginator->getPageSize();
-
-// 主动设置当前页码(1),客户端传入的页码参数失效
-$paginator->setCurrentPage(1);
-$paginator->getCurrentPage();
-
-```
-
 - LastId模式
 ```php
 use \hehe\core\hpage\Pagination;
+$hpage = new Pagination();
 $formQuery = [
     'page'=>1,// 当前页码
     'psize'=>10,// 每页显示条数
     'lastId'=>2// 当前页最后一条数据id
 ];
-$paginator = Pagination::queryPaginator($formQuery);
+$paginator = $hpage->queryPaginator($formQuery);
 
-// 开启lastId模式，并设置数据端参数名称:"id",客户端参数名称:"lastId"
-$paginator->asLastMode('id','lastId');
+// 开启lastId模式，并设置数据端参数名称:"id",'desc' id 的排序规则,客户端参数名称:"lastId"
+$paginator->asLastMode('id','desc','lastId');
 
 // 获取客户端lastId参数:2
 $paginator->getQueryLastId();
@@ -246,7 +249,7 @@ $paginator->setData([
 $paginator->getDataLastId();
 
 // 获取是否需要查询总条数状态,当客户端lastId参数为空时，返回true
-$paginator->getQueryCountStatus();
+$paginator->isQueryCount();
 ```
 
 ## 分页URL
@@ -254,11 +257,12 @@ $paginator->getQueryCountStatus();
 - 独立设置分页URL
 ```php
 use \hehe\core\hpage\Pagination;
+$hpage = new Pagination();
 $formQuery = [
     'page'=>1,// 当前页码
     'psize'=>10,// 每页显示条数
 ];
-$paginator = Pagination::queryPaginator($formQuery);
+$paginator = $hpage->queryPaginator($formQuery);
 $style = $paginator->newStyle();
 
 // 设置分页URL
@@ -283,9 +287,9 @@ Pagination::setUriBuilder(function(string $uri,array $uriParams = []){
     // return Route::buildUrL($uri,$uriParams);
     return $uri . '?' . http_build_query($uriParams);
 });
-
+$hpage = new Pagination();
 $formQuery = ['page'=>2,'psize'=>10];
-$paginator = Pagination::queryPaginator($formQuery);
+$paginator = $hpage->queryPaginator($formQuery);
 $style = $paginator->newStyle();
 $style->setUrl('user/logs',['userId'=>1]);
 
@@ -304,11 +308,12 @@ $currentPageUrl = $style->getCurrentPageUrl();
 ```php
 use \hehe\core\hpage\Pagination;
 use hehe\core\hpage\styles\PaginatorStyle;
+$hpage = new Pagination();
 $formQuery = [
     'page'=>1,// 当前页码
     'psize'=>10,// 每页显示条数
 ];
-$paginator = Pagination::queryPaginator($formQuery);
+$paginator = $hpage->queryPaginator($formQuery);
 
 // 分页器与样式绑定
 $pstyle = $paginator->setStyleClass(PaginatorStyle::class);
@@ -326,11 +331,12 @@ $style->toArray();
 ```php
 use \hehe\core\hpage\Pagination;
 use hehe\core\hpage\styles\NumPaginatorStyle;
+$hpage = new Pagination();
 $formQuery = [
     'page'=>1,// 当前页码
     'psize'=>10,// 每页显示条数
 ];
-$paginator = Pagination::queryPaginator($formQuery);
+$paginator = $hpage->queryPaginator($formQuery);
 
 // 分页器与样式绑定
 $pstyle = $paginator->setStyleClass(NumPaginatorStyle::class);

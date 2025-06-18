@@ -6,13 +6,13 @@ use hpage\tests\TestCase;
 
 class QueryPaginatorTest extends TestCase
 {
-    protected function setUp()
+    protected function setUp():void
     {
         parent::setUp();
     }
 
     // 单个测试之后(每个测试方法之后调用)
-    protected function tearDown()
+    protected function tearDown():void
     {
         parent::tearDown();
     }
@@ -169,7 +169,7 @@ class QueryPaginatorTest extends TestCase
         ]);
 
         $this->assertTrue($paginator->getDataLastId() === 6);
-        $this->assertTrue($paginator->getQueryCountStatus() === true);
+        $this->assertTrue($paginator->isQueryCount() === true);
     }
 
     public function testLastIdMode1()
@@ -189,7 +189,7 @@ class QueryPaginatorTest extends TestCase
 
         $this->assertTrue($paginator->getDataLastId() === 6);
         $this->assertTrue($paginator->getQueryLastId() === 3);
-        $this->assertTrue($paginator->getQueryCountStatus() === false);
+        $this->assertTrue($paginator->isQueryCount() === false);
     }
 
     public function testLastIdMode2()
@@ -208,7 +208,7 @@ class QueryPaginatorTest extends TestCase
         ]);
         $this->assertTrue($paginator->getDataLastId() === 6);
         $this->assertTrue($paginator->getQueryLastId() === 4);
-        $this->assertTrue($paginator->getQueryCountStatus() === true);
+        $this->assertTrue($paginator->isQueryCount() === true);
     }
 
 

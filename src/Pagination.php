@@ -17,58 +17,119 @@ use hehe\core\hpage\styles\PaginatorStyle;
 class Pagination
 {
     /**
+     * 当前页码参数名称
+     * @var string
+     */
+    protected $pageVar = 'page';
+
+    /**
+     * 每页大小参数名称
+     * @var string
+     */
+    protected $psizeVar = 'psize';
+
+    /**
+     * query最后id
+     * @var string
+     */
+    protected $lastIdVar = 'lastId';
+
+    // 返回的变量别名
+    protected $retAlias = [
+        'total'=>'total',
+        'psize'=>'psize',
+        'totalPage'=>'totalPage',
+        'currentPage'=>'currentPage',
+        'data'=>'data',
+        'lastId'=>'lastId'
+    ];
+
+    // url地址生成器
+    protected $uriBuilder;
+
+    /**
      * 分页器集合
      * @var array
      */
-    protected static $paginators = [
+    protected $paginators = [
         'paginator'=>Paginator::class,
         'query'=>QueryPaginator::class
     ];
 
+    public function __construct(array $config = [])
+    {
+        if (!empty($config)) {
+            $this->setOptions($config);
+        }
+    }
+
+    public function setOptions(array $options = []): void
+    {
+        foreach ($options as $name=>$value) {
+            if ($name === 'paginators') {
+                $this->paginators = array_merge($this->paginators,$value);
+            } else {
+                $this->{$name} = $value;
+            }
+        }
+
+        $this->setUriBuilder($this->uriBuilder);
+    }
+
     /**
      * 设置构建URL函数
-     * @param callable|null $uriBuilder
+     * @param callable|array|null $uriBuilder
      */
-    public static function setUriBuilder(?callable $uriBuilder = null):void
+    public function setUriBuilder($uriBuilder = null):void
     {
         PaginatorStyle::setUriBuilder($uriBuilder);
     }
 
-    public static function setPaginator(string $alias, string $paginator,...$args):void
+    public function setPaginator(string $alias, string $paginator,array $config = []):void
     {
-        static::$paginators[$alias] = ['class'=>$paginator,'args'=>$args];
+        $this->paginators[$alias] = ['class'=>$paginator,'config'=>$config];
     }
 
-    public static function createPaginator(string $name = '', ...$args):Paginator
+    public function createPaginator(string $name = '', ...$args):Paginator
     {
+        $options = [];
         $class = '';
         if (strpos($name, '\\') !== false) {
             $class = $name;
         } else {
-            if (isset(static::$paginators[$name])) {
-                $config = static::$paginators[$name];
-                if (is_array($config)) {
-                    $class = $config['class'];
-                    if (isset($config['args'])) {
-                        $args = $args + $config['args'];
+            if (isset($this->paginators[$name])) {
+                $paginatorConfig = $this->paginators[$name];
+                if (is_array($paginatorConfig)) {
+                    $class = $paginatorConfig['class'];
+                    if (isset($paginatorConfig['config'])) {
+                        $options = $paginatorConfig['config'];
                     }
                 } else {
-                    $class = $config;
+                    $class = $paginatorConfig;
                 }
             } else {
                 $class = __NAMESPACE__ . '\\paginators\\' . ucfirst($name) . 'Paginator';
             }
         }
 
-        return new $class(...$args);
+        $page = new $class(...$args);
+
+        $page->setOptions(array_merge([
+            'pageVar'=>$this->pageVar,
+            'psizeVar'=>$this->psizeVar,
+            'lastIdVar'=>$this->lastIdVar,
+            'retAlias'=>$this->retAlias
+        ],$options));
+
+        return $page;
     }
 
-    public static function __callStatic($method, $params)
+    public function __call($method, $params)
     {
         if (ucfirst(substr($method,-9)) === 'Paginator') {
-            return static::createPaginator(substr($method,0,-9), ...$params);
+            return $this->createPaginator(substr($method,0,-9), ...$params);
         } else {
-            return static::createPaginator($method, ...$params);
+            return $this->createPaginator($method, ...$params);
         }
     }
 
