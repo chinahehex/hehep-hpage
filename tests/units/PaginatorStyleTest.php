@@ -11,11 +11,13 @@ class PaginatorStyleTest extends TestCase
     protected function setUp():void
     {
         parent::setUp();
+    }
 
-        // 设置生成
-        PaginatorStyle::setUriBuilder(function (string $url,array $urlParams){
+    protected function getUriBuilder()
+    {
+        return function (string $url,array $urlParams){
             return $url . '?' . http_build_query($urlParams);
-        });
+        };
     }
 
     // 单个测试之后(每个测试方法之后调用)
@@ -29,6 +31,7 @@ class PaginatorStyleTest extends TestCase
         $paginator = new QueryPaginator(['page'=>5]);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
+        $pstyle->setUriBuilder($this->getUriBuilder());
         $this->assertTrue($pstyle->getCurrentPage() === 5);
         $this->assertTrue($pstyle->getFirstPage() === 1);
         $this->assertTrue($pstyle->getPrevPage() === 4);
@@ -41,6 +44,7 @@ class PaginatorStyleTest extends TestCase
         $paginator = new QueryPaginator(['page'=>31],10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
+        $pstyle->setUriBuilder($this->getUriBuilder());
         $pstyle->setPageVar('psize');
         $this->assertTrue($pstyle->getCurrentPage() === 31);
         $this->assertTrue($pstyle->getFirstPage() === 1);
@@ -54,6 +58,7 @@ class PaginatorStyleTest extends TestCase
         $paginator = new Paginator(5);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
+        $pstyle->setUriBuilder($this->getUriBuilder());
         $this->assertTrue($pstyle->getCurrentPage() === 5);
         $this->assertTrue($pstyle->getFirstPage() === 1);
         $this->assertTrue($pstyle->getPrevPage() === 4);
@@ -66,6 +71,7 @@ class PaginatorStyleTest extends TestCase
         $paginator = new Paginator(31,10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
+        $pstyle->setUriBuilder($this->getUriBuilder());
         $pstyle->setPageVar('page');
         $this->assertTrue($pstyle->getCurrentPage() === 31);
         $this->assertTrue($pstyle->getFirstPage() === 1);
@@ -79,6 +85,7 @@ class PaginatorStyleTest extends TestCase
         $paginator = new Paginator(31,10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
+        $pstyle->setUriBuilder($this->getUriBuilder());
         $pstyle->setPageVar('pagex')->setUrl('style');
         $this->assertTrue($pstyle->getCurrentPageUrl() === 'style?pagex=31');
         $this->assertTrue($pstyle->getFirstPageUrl() === 'style?pagex=1');
@@ -89,10 +96,10 @@ class PaginatorStyleTest extends TestCase
 
     public function testStyl5()
     {
-        PaginatorStyle::setUriBuilder(null);
         $paginator = new Paginator(31,10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
+        $pstyle->setUriBuilder($this->getUriBuilder());
         $pstyle->setPath('style1');
         $pstyle->setPageVar('psizex');
         $this->assertTrue($pstyle->getCurrentPageUrl() === 'style1?psizex=31');
@@ -104,10 +111,13 @@ class PaginatorStyleTest extends TestCase
 
     public function testStyl6()
     {
-        PaginatorStyle::setUriBuilder(null);
+        //PaginatorStyle::setUriBuilder(null);
         $paginator = new Paginator(31,10);
         $paginator->setTotalCount(300);
-        $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
+        $pstyle = $paginator->setStyleClass(PaginatorStyle::class)
+            ->newStyle();
+        $pstyle->seturiBuilder($this->getUriBuilder());
+
         $pstyle->setPath('http://www.baidu.com/user/style');
         $pstyle->setPageVar('psizex');
         $this->assertTrue($pstyle->getCurrentPageUrl() === 'http://www.baidu.com/user/style?psizex=31');
@@ -119,7 +129,7 @@ class PaginatorStyleTest extends TestCase
 
     public function testStyl7()
     {
-        PaginatorStyle::setUriBuilder(null);
+        //PaginatorStyle::setUriBuilder(null);
         $paginator = new Paginator(31,10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
@@ -134,7 +144,7 @@ class PaginatorStyleTest extends TestCase
 
     public function testStyl8()
     {
-        PaginatorStyle::setUriBuilder(null);
+        //PaginatorStyle::setUriBuilder(null);
         $paginator = new Paginator(31,10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
@@ -152,14 +162,17 @@ class PaginatorStyleTest extends TestCase
         $paginator = new Paginator(31,10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(NumPaginatorStyle::class)->newStyle();
+        $pstyle->seturiBuilder($this->getUriBuilder());
         $styleArr = $pstyle->toArray();
         $this->assertTrue(count($styleArr['style']['numPageUrl']) === 5);
 
         $pstyle = $paginator->setStyleClass(NumPaginatorStyle::class)->newStyle(11);
+        $pstyle->seturiBuilder($this->getUriBuilder());
         $styleArr = $pstyle->toArray();
         $this->assertTrue(count($styleArr['style']['numPageUrl']) === 11);
 
         $pstyle = $paginator->setStyleClass(NumPaginatorStyle::class)->newStyle();
+        $pstyle->seturiBuilder($this->getUriBuilder());
         $pstyle->setNumPageMax(13);
         $styleArr = $pstyle->toArray();
         $this->assertTrue(count($styleArr['style']['numPageUrl']) === 13);

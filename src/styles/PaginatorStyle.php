@@ -20,9 +20,9 @@ class PaginatorStyle
 
     /**
      * 构建URL函数
-     * @var callable
+     * @var array|string|callable
      */
-    protected static $uriBuilder;
+    protected $uriBuilder;
 
     /**
      * url基础路径
@@ -57,9 +57,19 @@ class PaginatorStyle
         $this->paginator = $paginator;
     }
 
-    public static function setUriBuilder(?callable $uriBuilder = null):void
+    /**
+     * 设置构建URL函数
+     * @param string|array|callable $uriBuilder
+     */
+    public function setUriBuilder($uriBuilder):self
     {
-        static::$uriBuilder = $uriBuilder;
+        if (is_string($uriBuilder)) {
+            $this->uriBuilder = explode('::',  $uriBuilder);
+        } else {
+            $this->uriBuilder = $uriBuilder;
+        }
+
+        return $this;
     }
 
     public function setPath(string $path):self
@@ -84,9 +94,9 @@ class PaginatorStyle
 
     public function buildUrl(int $pageNum):string
     {
-        if (!is_null(static::$uriBuilder) && !is_null($this->uri)) {
+        if (!is_null($this->uriBuilder) && !is_null($this->uri)) {
             $uri_params = array_merge($this->uriParams, [$this->pageVar=>$pageNum]);
-            return call_user_func(static::$uriBuilder, $this->uri,$uri_params);
+            return call_user_func($this->uriBuilder, $this->uri,$uri_params);
         } else if ($this->path !== '') {
             if (strpos($this->path,'[PAGE]') !== false) {
                 return str_replace('[PAGE]', (string) $pageNum, $this->path);

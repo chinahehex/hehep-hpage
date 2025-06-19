@@ -59,30 +59,43 @@ class Pagination
     public function __construct(array $config = [])
     {
         if (!empty($config)) {
-            $this->setOptions($config);
+            $this->setConfig($config);
         }
     }
 
-    public function setOptions(array $options = []): void
+    public function setConfig(array $config = []): void
     {
-        foreach ($options as $name=>$value) {
+        foreach ($config as $name=>$value) {
             if ($name === 'paginators') {
                 $this->paginators = array_merge($this->paginators,$value);
             } else {
                 $this->{$name} = $value;
             }
         }
-
-        $this->setUriBuilder($this->uriBuilder);
     }
 
     /**
      * 设置构建URL函数
-     * @param callable|array|null $uriBuilder
+     * @param string|callable|array|null $uriBuilder
      */
-    public function setUriBuilder($uriBuilder = null):void
+    public function setUriBuilder($uriBuilder):self
     {
-        PaginatorStyle::setUriBuilder($uriBuilder);
+        if (is_string($uriBuilder)) {
+            $this->uriBuilder = explode('::',  $uriBuilder);
+        } else {
+            $this->uriBuilder = $uriBuilder;
+        }
+        
+        return $this;
+    }
+
+    /**
+     * 获取构建URL函数
+     * @return string|callable|array|null
+     */
+    public function getUriBuilder()
+    {
+        return $this->uriBuilder;
     }
 
     public function setPaginator(string $alias, string $paginator,array $config = []):void
@@ -112,13 +125,15 @@ class Pagination
             }
         }
 
+        /** @var Paginator $page */
         $page = new $class(...$args);
 
-        $page->setOptions(array_merge([
+        $page->setConfig(array_merge([
             'pageVar'=>$this->pageVar,
             'psizeVar'=>$this->psizeVar,
             'lastIdVar'=>$this->lastIdVar,
-            'retAlias'=>$this->retAlias
+            'retAlias'=>$this->retAlias,
+            'pagination'=>$this,
         ],$options));
 
         return $page;

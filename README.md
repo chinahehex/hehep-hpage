@@ -35,6 +35,11 @@ $config = [
     // 客户端lastId参数名称
     'lastIdVar'=>'lastId',
     
+    // 预定义分页器
+    'paginators' => [
+        'query'=>['class'=>QueryPaginator::class,'styleClass'=>'样式类路径']
+    ],
+    
     // toArray 返回的变量别名,基本格式<键名=>别名>
     'retAlias'=>[
         'total'=>'total',// 总条数
@@ -45,8 +50,8 @@ $config = [
         'lastId'=>'lastId'// 当前页最后一条数据id
     ],
     
-    // url 地址生成器call_user_func 方法格式
-    'uriBuilder'=>[]//
+    // url地址生成器call_user_func 方法格式,Route::buildUrl,闭包
+   'uriBuilder'=>[],
 ];
 
 
@@ -56,12 +61,16 @@ $config = [
 - 客户端分页
 ```php
 use hehe\core\hpage\Pagination;
+use hehe\core\hroute\Route;
 $hpage = new Pagination();
 // 表单数据
 $form = [
     'page'=>1,// 当前页码
     'psize'=>10,// 每页显示条数
 ];
+
+// 设置全局url地址生成器
+$hpage->setUriBuilder('hehe\core\hroute\Route::buildUrl');
 
 // 创建一个客户端分页器
 $paginator = $hpage->queryPaginator($form);
@@ -162,6 +171,7 @@ $result = [
 - 创建客户端分页器
 ```php
 use \hehe\core\hpage\Pagination;
+use \hehe\core\hpage\paginators\QueryPaginator;
 $hpage = new Pagination();
 $formQuery = [
     'page'=>1,// 当前页码
@@ -279,9 +289,9 @@ $currentPageUrl = $style->getCurrentPageUrl();
 - 全局URL生成器
 ```php
 use \hehe\core\hpage\Pagination;
-
+$hpage = new Pagination();
 // 设置全局URL生成器
-Pagination::setUriBuilder(function(string $uri,array $uriParams = []){
+$hpage->setUriBuilder(function(string $uri,array $uriParams = []){
     // 自定义自己的URL生成规则
     // $uriParams 已经包含了分页参数
     // return Route::buildUrL($uri,$uriParams);
@@ -291,6 +301,10 @@ $hpage = new Pagination();
 $formQuery = ['page'=>2,'psize'=>10];
 $paginator = $hpage->queryPaginator($formQuery);
 $style = $paginator->newStyle();
+
+// 设置分页样式url生成器
+$style->setUriBuilder();
+
 $style->setUrl('user/logs',['userId'=>1]);
 
 // 获取当前页URL

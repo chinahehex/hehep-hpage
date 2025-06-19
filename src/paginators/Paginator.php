@@ -1,6 +1,7 @@
 <?php
 namespace hehe\core\hpage\paginators;
 
+use hehe\core\hpage\Pagination;
 use hehe\core\hpage\styles\PaginatorStyle;
 
 /**
@@ -80,19 +81,41 @@ class Paginator
      */
     protected $styleClass = PaginatorStyle::class;
 
+    /**
+     * @var ?Pagination
+     */
+    protected $pagination;
+
+    protected $uriBuilder;
+
     public function __construct(int $currentPage, int $psize = 10)
     {
         $this->setCurrentPage($currentPage);
         $this->setPageSize($psize);
     }
 
-    public function setOptions(array $options = []): void
+    public function setConfig(array $config = []): void
     {
-        foreach ($options as $name=>$value) {
+        foreach ($config as $name=>$value) {
             if (property_exists($this,$name)) {
                 $this->{$name} = $value;
             }
         }
+    }
+
+    /**
+     * 设置构建URL函数
+     * @param string|callable|array|null $uriBuilder
+     */
+    public function setUriBuilder($uriBuilder):self
+    {
+        if (is_string($uriBuilder)) {
+            $this->uriBuilder = explode('::',  $uriBuilder);
+        } else {
+            $this->uriBuilder = $uriBuilder;
+        }
+
+        return $this;
     }
 
     /**
@@ -288,8 +311,14 @@ class Paginator
         /** @var PaginatorStyle $pstyle */
         $paginatorStyle = $this->styleClass;
         $pstyle = new $paginatorStyle(...$args);
-        $pstyle->setPageVar($this->getPageVar());
-        $pstyle->setPaginator($this);
+        $pstyle->setPageVar($this->getPageVar())
+            ->setPaginator($this);
+
+        if (!is_null($this->uriBuilder)) {
+            $pstyle->setUriBuilder($this->uriBuilder);
+        } else if (!is_null($this->pagination)) {
+            $pstyle->setUriBuilder($this->pagination->getUriBuilder());
+        }
 
         return $pstyle;
     }

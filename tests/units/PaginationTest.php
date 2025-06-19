@@ -97,14 +97,13 @@ class PaginationTest extends TestCase
 
     public function testSetUrlBuilder()
     {
-        // 设置生成
-        PaginatorStyle::setUriBuilder(function (string $url,array $urlParams){
-            return $url . '?' . http_build_query($urlParams);
-        });
 
         $paginator =$this->hpage->paginator(31,10);
         $paginator->setTotalCount(300);
         $pstyle = $paginator->setStyleClass(PaginatorStyle::class)->newStyle();
+        $pstyle->setUriBuilder(function (string $url,array $urlParams){
+            return $url . '?' . http_build_query($urlParams);
+        });
         $pstyle->setPageVar('psizex')->setUrl('style');
         $this->assertTrue($pstyle->getCurrentPageUrl() === 'style?psizex=31');
         $this->assertTrue($pstyle->getFirstPageUrl() === 'style?psizex=1');
@@ -116,7 +115,7 @@ class PaginationTest extends TestCase
 
     public function testRetAlias()
     {
-        $this->hpage->setOptions([
+        $this->hpage->setConfig([
             'retAlias'=>['total'=>'total1','psize'=>'psize']
         ]);
 
@@ -130,7 +129,7 @@ class PaginationTest extends TestCase
 
     public function testRetAlias1()
     {
-        $this->hpage->setOptions([
+        $this->hpage->setConfig([
             'retAlias'=>['total','psize'=>'pagesize']
         ]);
 
